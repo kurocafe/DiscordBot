@@ -229,49 +229,6 @@ async def reset(ctx):
         await send_Exception(e)
 
 
-# @bot.event
-# async def on_raw_typing(payload):
-#     if payload.user_id == Nate:
-#         user = bot.get_user(Nate)
-#         channel_1 = bot.get_channel(830229442625536034)
-#         channel_2 = bot.get_channel(1126561190760431669)
-#         await channel_1.send(f"{user.mention} 12300円はよ")
-#         await channel_2.send(f"{user.mention} 12300円はよ")
-#     else:
-#         pass
-
-
-# @bot.event
-# async def on_message(message):
-#     try:
-#         if message.author.id != bot.user.id:
-#             dIndex = message.content.index('d')
-#             num1 = int(message.content[:dIndex])
-#             num2 = int(message.content[dIndex+1:])
-#             diceNumber = []
-#             print("check")
-
-#             if num1 == 1:
-#                 diceNumber = random.randint(1,num2)
-#                 if diceNumber <= 5:
-#                     await message.reply(f"{num1}d{num2} → {diceNumber} トリケラトプス！")
-#                 elif diceNumber >= 96:
-#                     await message.reply(f"{num1}d{num2} → {diceNumber} しょうれい！")
-#                 else:
-#                     await message.reply(f"{num1}d{num2} → {diceNumber}")
-#             elif num1 > 1:
-#                 for i in range(0,num1):
-#                     diceNumber =  diceNumber + [random.randint(1,num2)]
-#                 await message.reply(f"{num1}d{num2} → {diceNumber} > {sum(diceNumber)}")
-#                 print("test")
-#             else :
-#                 await message.reply("400 Bad Request (error code: 50035): Invalid Form Body \nIn content: Must be 2000 or fewer in length.")
-#                 await message.channel.send("Fuck you.")
-#         else:
-#             pass
-#     except Exception as e:
-#         pass
-
 ALLOWED_CHANNEL_IDS = [
     1252552488431783978,
     178169252033863753,
