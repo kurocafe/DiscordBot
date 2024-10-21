@@ -8,9 +8,7 @@ import time
 import json
 from os import getenv
 from discord.ui.item import Item
-from dotenv import load_dotenv
 import asyncio
-from openai import OpenAI
 import ollama
 import requests
 import io
