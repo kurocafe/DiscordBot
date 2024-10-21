@@ -20,7 +20,6 @@ load_dotenv()
 
 url = getenv('URL')
 
-# あなたはツンデレです。描写は送らなくていいです。セリフだけ送ってください。
 DEFAULT_SYSTEM_PROMPT = "あなたは誠実で優秀な日本人のアシスタントです。特に指示が無い場合は、常に日本語で回答してください。2~3文で簡潔に答えてください。もし、答えられない場合は「答えられません」と教えてください。"
 modelfile='''
 FROM ./Llama-3-ELYZA-JP-8B-q4_k_m.gguf
@@ -367,7 +366,7 @@ async def talk(message_content, message):
         # await send_Exception(e)
 
     new_message = {'role': 'assistant', 'content': response['message']['content']}
-    # print("chinchin")
+    # print("test")
     try :
         cur.execute(f'INSERT INTO messages(usr_id, message) values(?, ?)',
                     (usr_id, json.dumps(new_message, ensure_ascii=False)))
