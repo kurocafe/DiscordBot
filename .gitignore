@@ -167,4 +167,4 @@ cython_debug/
 *.gguf
 *.db
 .DS*
-.out
+*.out
