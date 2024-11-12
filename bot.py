@@ -247,6 +247,7 @@ ALLOWED_CHANNEL_IDS = [
 async def on_message(message):
     try:
         if message.author.id != bot.user.id and (message.channel.id in ALLOWED_CHANNEL_IDS):
+            print("talk")
             await talk(message.content, message)
         elif message.author.id is not bot.user.id:
             dIndex = message.content.index('d')
@@ -275,9 +276,30 @@ async def on_message(message):
             pass
 
     except Exception as e:
-        pass
-        # await send_Exception(e)
+        # pass
+        await send_Exception(e)
         # print(e)
+        
+def insert_user_and_message(conn, usr_id, usr_name, usr_message):
+    cur = conn.cursor()
+    try:
+        # パラメータ化クエリを使用してSQLインジェクションを防ぐ
+        cur.execute('SELECT * FROM persons WHERE id = ? AND name = ?', (usr_id, usr_name))
+        person = cur.fetchone()
+        
+        if person is None:
+            cur.execute('INSERT INTO persons(id, name) VALUES (?, ?)', (usr_id, usr_name))
+        
+        # メッセージの挿入
+        cur.execute('INSERT INTO messages(usr_id, message) VALUES (?, ?)',
+                    (usr_id, json.dumps(usr_message, ensure_ascii=False)))
+        
+        conn.commit()
+    except sql.Error as e:
+        conn.rollback()
+        raise e
+    finally:
+        cur.close()
     
 
 async def talk(message_content, message):
@@ -285,8 +307,9 @@ async def talk(message_content, message):
     usr_id = message.author.id
     usr_name = message.author
     test = message.author.name
-    # print(usr_name)
-    # print(test)
+    print(usr_name)
+    print(test)
+    print(usr_id)
     cur = conn.cursor()
     person = cur.execute(f'SELECT * FROM persons where id = {usr_id} AND name = "{usr_name}"').fetchone()
     if person is None :
@@ -461,7 +484,7 @@ async def lunch(interaction):
             description=list["Lunch"][random.randint(0, len(list["Lunch"])-1)]
         )
 
-        embed.set_author(
+        embed.set_user(
             name=bot.user,
             icon_url=bot.user.avatar
         )
@@ -471,7 +494,7 @@ async def lunch(interaction):
             icon_url=interaction.user.avatar
         )
         await interaction.response.send_message(embed = embed)
-        # await interaction.respond(f"{interaction.author.mention} "+list["Lunch"][random.randint(0, len(list["Lunch"])-1)])
+        # await interaction.respond(f"{interaction.user.mention} "+list["Lunch"][random.randint(0, len(list["Lunch"])-1)])
     except Exception as e:
         await send_Exception(e)
 
@@ -515,7 +538,7 @@ async def test(interaction):
             thumbnail="https://cdn.discordapp.com/attachments/830229442625536034/1243559479367176245/15.jpg?ex=6653e4c4&is=66529344&hm=5d6297a1227f99b9d85e697175616932f771e40f966469bbf1f73b5206cd8688&"
         )
         
-        embed.set_author(
+        embed.set_user(
             name=bot.user,
             icon_url=bot.user.avatar
         )
