@@ -247,14 +247,12 @@ ALLOWED_CHANNEL_IDS = [
 async def on_message(message):
     try:
         if message.author.id != bot.user.id and (message.channel.id in ALLOWED_CHANNEL_IDS):
-            print("talk")
             await talk(message.content, message)
         elif message.author.id is not bot.user.id:
             dIndex = message.content.index('d')
             num1 = int(message.content[:dIndex])
             num2 = int(message.content[dIndex+1:])
             diceNumber = []
-            print("check")
 
             if num1 == 1:
                 diceNumber = random.randint(1,num2)
@@ -268,7 +266,6 @@ async def on_message(message):
                 for i in range(0,num1):
                     diceNumber =  diceNumber + [random.randint(1,num2)]
                 await message.reply(f"{num1}d{num2} → {diceNumber} > {sum(diceNumber)}")
-                print("test")
             else :
                 await message.reply("400 Bad Request (error code: 50035): Invalid Form Body \nIn content: Must be 2000 or fewer in length.")
                 await message.channel.send("Fuck you.")
@@ -307,9 +304,9 @@ async def talk(message_content, message):
     usr_id = message.author.id
     usr_name = message.author
     test = message.author.name
-    print(usr_name)
-    print(test)
-    print(usr_id)
+    # print(usr_name)
+    # print(test)
+    # print(usr_id)
     cur = conn.cursor()
     person = cur.execute(f'SELECT * FROM persons where id = {usr_id} AND name = "{usr_name}"').fetchone()
     if person is None :
