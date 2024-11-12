@@ -72,14 +72,14 @@ ChatCnt = 1
 
 
 TOKEN=getenv('TOKEN')
-kurocafe=getenv('DEVELOPER_ID')
+kurocafe = int(getenv('DEVELOPER_ID'))
 Nate=getenv('USER_ID_1')
 Seisan=getenv('USER_ID_2')
 TestServer=getenv('SERVER_ID_1')
-Cthulhu=getenv('SERVER_ID_2')
-TokuWaka=getenv('SERVER_ID_3')
+Cthulhu = discord.Object(id=int(getenv('SERVER_ID_2')))
+TokuWaka = discord.Object(id=int(getenv('SERVER_ID_3')))
 Nakaura=getenv('SERVER_ID_4')
-Shorei_friends=getenv('SERVER_ID_5')
+Shorei_friends = discord.Object(id=int(getenv('SERVER_ID_5')))
 kurocafeChat=getenv('CHATROOM_ID')
 ChatRoom=getenv('CHANNEL_ID')
 
@@ -150,6 +150,8 @@ async def on_ready():
     await bot.change_presence(activity=discord.Game("Blue Archive"))
     # await ollama_client.create(model='Miyako', modelfile=modelfile)
     # await bot.change_presence(activity=discord.Game("test"))
+    await bot.tree.sync()
+    
     print('Logged in as '+bot.user.name)
     cur = conn.cursor()
     table1 = cur.execute('SELECT name FROM sqlite_master WHERE type="table" AND name="persons"').fetchone()
@@ -180,53 +182,54 @@ async def on_ready():
     
 
 
-@bot.slash_command(guild_ids=[Nakaura], description='アラームを設定できます！')
-async def alarm(ctx, month, day, hours, minutes):
-    try:
-        schedule = [month, day, hours, minutes, ctx.channel.id]
-        with open('list.json', encoding="utf-8") as f:
-            update = json.load(f)
-        update['Schedule'] = update['Schedule'] + [schedule]
-        with open('list.json', mode='w') as f:
-            json.dump(update, f, indent=2)
+# @bot.tree.command(name="alarm", description='アラームを設定できます！')
+# async def alarm(interaction: discord.Integration, month, day, hours, minutes):
+#     try:
+#         schedule = [month, day, hours, minutes, interaction.channel.id]
+#         with open('list.json', encoding="utf-8") as f:
+#             update = json.load(f)
+#         update['Schedule'] = update['Schedule'] + [schedule]
+#         with open('list.json', mode='w') as f:
+#             json.dump(update, f, indent=2)
 
-        embed = discord.Embed(
-            title="日赤",
-            color=0x7fffff,
-            description=f"{month}/{day}, {hours}:{minutes}で予約しました！"
-        )
+#         embed = discord.Embed(
+#             title="日赤",
+#             color=0x7fffff,
+#             description=f"{month}/{day}, {hours}:{minutes}で予約しました！"
+#         )
         
-        embed.set_footer(
-            text=f"made by {ctx.user}",
-            icon_url=ctx.user.avatar
-        )
-        await ctx.respond(embed = embed)
-        print(update['Schedule'])
-    except Exception as e:
-        await send_Exception(e)
+#         embed.set_footer(
+#             text=f"made by {interaction.user}",
+#             icon_url=interaction.user.avatar
+#         )
+#         await interaction.respond(embed = embed)
+#         print(update['Schedule'])
+#     except Exception as e:
+#         await send_Exception(e)
 
 
-@bot.slash_command(guild_ids=[Cthulhu], description = 'botを終了します。')
-async def quit(ctx):
+# @bot.slash_command(guild_ids=[Cthulhu], description = 'botを終了します。')
+@bot.tree.command(name="quit", description='botを終了します。', guilds=[Cthulhu])
+async def quit(interaction: discord.Interaction):
     try:
-        if ctx.author.id == kurocafe:
-            await ctx.respond("終了します。")
+        if interaction.user.id == kurocafe:
+            await interaction.response.send_message("終了します。")
             await bot.close()
         else:
-            await ctx.respond("権限がありません。")
+            await interaction.response.send_message(f"{interaction.user.mention}, 権限がありません。")
     except Exception as e:
         await send_Exception(e)
         
-@bot.slash_command(guild_ids=[Cthulhu], description = 'チャット履歴をリセットします。')
-async def reset(ctx):
-    try:
-        if ctx.author.id == kurocafe:
-            await ctx.respond("リセットしました。")
-            del messages[1:]
-        else:
-            await ctx.respond("権限がありません。")
-    except Exception as e:
-        await send_Exception(e)
+# @bot.slash_command(guild_ids=[Cthulhu], description = 'チャット履歴をリセットします。')
+# async def reset(interaction):
+#     try:
+#         if interaction.user.id == kurocafe:
+#             await interaction.response("リセットしました。")
+#             del messages[1:]
+#         else:
+#             await interaction.respond("権限がありません。")
+#     except Exception as e:
+#         await send_Exception(e)
 
 
 ALLOWED_CHANNEL_IDS = [
@@ -428,27 +431,26 @@ class SelectChara(discord.ui.View):
         await interaction.response.send_message(content=url["url"][int(select.values[0])])
 
 
-@bot.slash_command(guild_ids=[Cthulhu, TokuWaka])
-async def cs(ctx):
+@bot.tree.command(name="cs", description="キャラクターを選んでください。", guilds=[Cthulhu, TokuWaka])
+async def cs(interaction):
     try:
         view = SelectChara()
-        await ctx.respond("キャラクターを選んでください．", view=view)
+        await interaction.response.send_massage("キャラクターを選んでください．", view=view)
     except Exception as e:
         await send_Exception(e)
 
-
-@bot.slash_command(guild_ids=[Cthulhu], description ='send pic')
-async def huohuo(ctx):
+@bot.tree.command(name="huohuo",description="send pic huohuo", guilds=[Cthulhu])
+async def huohuo(interaction):
     try:
         with open('list.json', encoding="utf-8") as f:
             Pic = json.load(f)
-        await ctx.respond(file=discord.File(Pic["Huohuo"][random.randint(0, len(Pic["Huohuo"])-1)]))
+        await interaction.response.send_messsage(file=discord.File(Pic["Huohuo"][random.randint(0, len(Pic["Huohuo"])-1)]))
     except Exception as e:
         await send_Exception(e)
 
 
-@bot.slash_command(guild_ids=[Cthulhu], description='今日のご飯は？')
-async def lunch(ctx):
+@bot.tree.command(name="lunch", description="今日のご飯は？", guilds=[Cthulhu])
+async def lunch(interaction):
     try:
         with open('list.json', encoding="utf-8") as f:
             list = json.load(f)
@@ -465,44 +467,45 @@ async def lunch(ctx):
         )
         
         embed.set_footer(
-            text=f"made by {ctx.user}",
-            icon_url=ctx.user.avatar
+            text=f"made by {interaction.user}",
+            icon_url=interaction.user.avatar
         )
-        await ctx.respond(embed = embed)
-        # await ctx.respond(f"{ctx.author.mention} "+list["Lunch"][random.randint(0, len(list["Lunch"])-1)])
+        await interaction.response.send_message(embed = embed)
+        # await interaction.respond(f"{interaction.author.mention} "+list["Lunch"][random.randint(0, len(list["Lunch"])-1)])
     except Exception as e:
         await send_Exception(e)
 
-@bot.slash_command(guild_ids=[Cthulhu, Shorei_friends], description ='ボイスチャンネルに参加します。')
-async def join(ctx):
+
+@bot.tree.command(name="join", description="ボイスチャンネルに参加します。", guilds=[Cthulhu, TokuWaka, Shorei_friends])
+async def join(interaction):
     try:
-        if ctx.author.voice is None:
-            await ctx.respond("あなたはボイスチャンネルに接続していません。")
+        if interaction.user.voice is None:
+            await interaction.response.send_message("あなたはボイスチャンネルに接続していません。")
             
         else :
-            await ctx.author.voice.channel.connect()
-            await ctx.respond("接続しました。")
-    
-    except Exception as e:
-        await send_Exception(e)
-        
-        
-@bot.slash_command(guild_ids=[Cthulhu, Shorei_friends], description ='ボイスチャンネルから退出します。')
-async def leave(ctx):
-    try:
-        if ctx.guild.voice_client is None:
-            await ctx.respond("ボイスチャンネルに接続していません。")
-            
-        else :
-            await ctx.guild.voice_client.disconnect()
-            await ctx.respond("切断しました。") 
+            await interaction.user.voice.channel.connect()
+            await interaction.response.send_message("接続しました。")
     
     except Exception as e:
         await send_Exception(e)
         
 
-@bot.slash_command(guild_ids=[Cthulhu, TokuWaka], description = '色々試すときに使うよ')
-async def test(ctx):
+@bot.tree.command(name="leave", description="ボイスチャンネルから退出します。", guilds=[Cthulhu, TokuWaka, Shorei_friends])
+async def leave(interaction):
+    try:
+        if interaction.guild.voice_client is None:
+            await interaction.response.send_message("ボイスチャンネルに接続していません。")
+            
+        else :
+            await interaction.guild.voice_client.disconnect()
+            await interaction.response.send_message("切断しました。") 
+    
+    except Exception as e:
+        await send_Exception(e)
+        
+
+@bot.tree.command(name="test", description="テストで使うよ", guilds=[Cthulhu, TokuWaka])
+async def test(interaction):
     try:
         embed = discord.Embed(
             title="Test Embed", 
@@ -525,12 +528,12 @@ async def test(ctx):
         # embed.set_field_at(name="field_2", value="value_2")
         
         embed.set_footer(
-            text=f"made by {ctx.user}",
-            icon_url=ctx.user.avatar
+            text=f"made by {interaction.user}",
+            icon_url=interaction.user.avatar
         )
 
         
-        await ctx.respond(embed = embed)
+        await interaction.response.send_message(embed = embed)
     except Exception as e:
         await send_Exception(e)
 
