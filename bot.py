@@ -273,8 +273,8 @@ async def on_message(message):
             pass
 
     except Exception as e:
-        # pass
-        await send_Exception(e)
+        pass
+        # await send_Exception(e)
         # print(e)
         
 def insert_user_and_message(conn, usr_id, usr_name, usr_message):
