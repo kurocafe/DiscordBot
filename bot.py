@@ -308,11 +308,13 @@ async def talk(message_content, message):
     # print(test)
     # print(usr_id)
     cur = conn.cursor()
+    # ユーザーがいなかったら新たに追加
     person = cur.execute(f'SELECT * FROM persons where id = {usr_id} AND name = "{usr_name}"').fetchone()
     if person is None :
         cur.execute(f'INSERT INTO persons(id, name) values({usr_id}, "{usr_name}")')
         conn.commit()
     
+    # ユーザーの発言を追加
     try :
         cur.execute(f'INSERT INTO messages(usr_id, message) values(?, ?)',
                     (usr_id, json.dumps(usr_message, ensure_ascii=False)))
@@ -321,6 +323,7 @@ async def talk(message_content, message):
         # print(f"{json.dumps(usr_message, ensure_ascii=False)}")
         await send_Exception(e)
     
+    # ユーザーの発言を引き出す
     message_str = cur.execute(f'SELECT message FROM messages WHERE usr_id={usr_id}').fetchall()
     # print(message_str)
     try:
